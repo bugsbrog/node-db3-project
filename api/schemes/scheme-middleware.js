@@ -4,6 +4,7 @@ const db = require('../../data/db-config')
 const checkSchemeId = async (req, res, next) => {
   const { scheme_id } = req.params
     try {
+    // WHY DOES IT HAVE TO BE DONE THIS WAY?!
       const scheme = await db('schemes')
           .where('scheme_id', scheme_id)
           .first()
@@ -28,8 +29,20 @@ const checkSchemeId = async (req, res, next) => {
     "message": "invalid scheme_name"
   }
 */
-const validateScheme = (req, res, next) => {
-
+const validateScheme = async (req, res, next) => {
+  const { scheme_name } = req.body
+    try {
+      if (!scheme_name || typeof scheme_name !== 'string' || !scheme_name.trim()) {
+        next({
+          status: 400,
+          message: 'invalid scheme name'
+        })
+      } else {
+        next()
+      }
+    } catch (err) {
+        next(err)
+    }
 }
 
 /*
