@@ -24,10 +24,8 @@ async function find() {
     return rows
 }
 
-async function findById(scheme_id) { // EXERCISE B
+async function findById(scheme_id) {
   /*
-    1B- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`:
-
       SELECT
           sc.scheme_name,
           st.*
@@ -37,61 +35,23 @@ async function findById(scheme_id) { // EXERCISE B
       WHERE sc.scheme_id = 1
       ORDER BY st.step_number ASC;
    */
+
+    const rows = await db('schemes as sc')
+        .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
+        .select('sc.scheme_name', 'st.*')
+        .where('sc.scheme_id', scheme_id)
+        .orderBy('st.step_number', 'ASC')
+
+    const result = {
+        scheme_id: rows[0].scheme_id,
+        scheme_name: rows[0].scheme_name,
+        steps: rows[0].step_id
+            ? rows.map(row => ({ step_id: row.step_id, step_number: row.step_number, instructions: row.instructions }))
+            : []
+    }
+
+    return result
 }
-
-    // 2B- When you have a grasp on the query go ahead and build it in Knex
-    // making it parametric: instead of a literal `1` you should use `scheme_id`.
-    //
-    // 3B- Test in Postman and see that the resulting data does not look like a scheme,
-    // but more like an array of steps each including scheme information:
-    //
-    //   [
-    //     {
-    //       "scheme_id": 1,
-    //       "scheme_name": "World Domination",
-    //       "step_id": 2,
-    //       "step_number": 1,
-    //       "instructions": "solve prime number theory"
-    //     },
-    //     {
-    //       "scheme_id": 1,
-    //       "scheme_name": "World Domination",
-    //       "step_id": 1,
-    //       "step_number": 2,
-    //       "instructions": "crack cyber security"
-    //     },
-    //     // etc
-    //   ]
-
-    // 4B- Using the array obtained and vanilla JavaScript, create an object with
-    // the structure below, for the case _when steps exist_ for a given `scheme_id`:
-    //
-    //   {
-    //     "scheme_id": 1,
-    //     "scheme_name": "World Domination",
-    //     "steps": [
-    //       {
-    //         "step_id": 2,
-    //         "step_number": 1,
-    //         "instructions": "solve prime number theory"
-    //       },
-    //       {
-    //         "step_id": 1,
-    //         "step_number": 2,
-    //         "instructions": "crack cyber security"
-    //       },
-    //       // etc
-    //     ]
-    //   }
-
-//     5B- This is what the result should look like _if there are no steps_ for a `scheme_id`:
-//
-//       {
-//         "scheme_id": 7,
-//         "scheme_name": "Have Fun!",
-//         "steps": []
-//       }
-// }
 
 function findSteps(scheme_id) { // EXERCISE C
   /*
